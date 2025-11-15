@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
+import { GithubIcon } from "lucide-react";
 export const LoginForm = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -16,8 +17,8 @@ export const LoginForm = () => {
         <Image
           src={"/login.png"}
           alt="Login"
-          height={500}
-          width={500}
+          height={400}
+          width={400}
           className="rounded-xl"
         />
         <h1 className="text-6xl font-extrabold text-purple-400">
@@ -31,7 +32,19 @@ export const LoginForm = () => {
         <CardContent>
           <div className="grid gap-6">
             <div className="flex flex-col gap-4">
-              <Button variant={"outline"} className="w-full h-full"></Button>
+              <Button
+                variant={"outline"}
+                className="w-full h-full"
+                onClick={() =>
+                  authClient.signIn.social({
+                    provider: "github",
+                    callbackURL: process.env.NEXT_PUBLIC_AUTH_CALLBACK_URL!,
+                  })
+                }
+              >
+                <GithubIcon className="h-4" />
+                Continue with GitHub
+              </Button>
             </div>
           </div>
         </CardContent>
