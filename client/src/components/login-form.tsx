@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
 import { GithubIcon } from "lucide-react";
-export const LoginForm = () => {
+export const LoginForm = ({ redirect }: { redirect?: string }) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -38,7 +38,8 @@ export const LoginForm = () => {
                 onClick={() =>
                   authClient.signIn.social({
                     provider: "github",
-                    callbackURL: process.env.NEXT_PUBLIC_AUTH_CALLBACK_URL!,
+                    callbackURL:
+                      redirect ?? process.env.NEXT_PUBLIC_AUTH_CALLBACK_URL!,
                   })
                 }
               >

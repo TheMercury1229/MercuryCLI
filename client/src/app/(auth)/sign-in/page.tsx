@@ -2,11 +2,12 @@
 import { LoginForm } from "@/components/login-form";
 import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/dist/client/components/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function SignInPage() {
   const { data, isPending } = authClient.useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   if (isPending) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
@@ -15,11 +16,16 @@ export default function SignInPage() {
     );
   }
   if (data?.session || data?.user) {
-    router.push("/");
+    const redirect = searchParams.get("redirect");
+    if (redirect) {
+      router.push(redirect);
+    } else {
+      router.push("/");
+    }
   }
   return (
     <>
-      <LoginForm />
+      <LoginForm redirect={searchParams.get("redirect") || undefined} />
     </>
   );
 }

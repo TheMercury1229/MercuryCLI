@@ -18,6 +18,10 @@ app.use(
 app.all("/api/auth/*splat", toNodeHandler(auth));
 
 app.use(express.json());
+app.get("/device", (req, res) => {
+  // const { user_code } = req.query;
+  res.redirect(`${process.env.FRONTEND_URL || "http://localhost:3000"}/device`);
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
