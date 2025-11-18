@@ -7,6 +7,7 @@ import { Command } from "commander";
 import { login } from "./commands/auth/login.js";
 import { logout } from "./commands/auth/logout.js";
 import { whoami } from "./commands/auth/me.js";
+import { wakeup } from "./commands/ai/wakeup.js";
 // dotenv.config();
 
 async function main() {
@@ -28,7 +29,8 @@ async function main() {
     .description("Mercury CLI - A CLI based AI Tool")
     .addCommand(login)
     .addCommand(logout)
-    .addCommand(whoami);
+    .addCommand(whoami)
+    .addCommand(wakeup);
 
   program.action(() => {
     program.help();

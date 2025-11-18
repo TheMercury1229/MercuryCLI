@@ -1,6 +1,6 @@
 import { google } from "@ai-sdk/google";
-import { streamText } from "ai";
-import config from "../../config/ai.config.js";
+import { convertToModelMessages, streamText } from "ai";
+import config from "../config/ai.config.js";
 import chalk from "chalk";
 export class AIService {
   constructor() {
@@ -26,19 +26,20 @@ export class AIService {
         model: this.model,
         messages: messages,
       };
-      const result = streamText(streamConfig);
+      const result = await streamText(streamConfig);
       let fullResponse = "";
-      for await (const chunk of result) {
+
+      for await (const chunk of result.textStream) {
         fullResponse += chunk;
         if (onChunk) {
           onChunk(chunk);
         }
       }
-      const fullResult = fullResponse;
+
       return {
-        content: fullResult,
-        finishReason: fullResult.finishReason,
-        usage: fullResult.usage,
+        content: fullResponse,
+        finishReason: await result.finishReason,
+        usage: await result.usage,
       };
     } catch (error) {
       console.error(chalk.red("Error communicating with AI model:"), error);
