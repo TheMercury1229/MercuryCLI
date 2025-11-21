@@ -5,6 +5,7 @@ import { getStoredToken } from "../../../lib/token.js";
 import prisma from "../../../lib/db.js";
 import { select } from "@clack/prompts";
 import { startChatWithAI } from "../../chat/chatwithai.js";
+import { startToolChat } from "../../chat/chatwithtools.js";
 
 export async function wakeupCommand() {
   const token = getStoredToken();
@@ -72,7 +73,7 @@ export async function wakeupCommand() {
       startChatWithAI("chat");
       break;
     case "tool":
-      console.log(chalk.blue("Starting tool mode..."));
+      startToolChat("tool");
       break;
     case "agent":
       console.log(chalk.blue("Starting agentic mode..."));

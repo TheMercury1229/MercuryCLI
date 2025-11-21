@@ -4,7 +4,7 @@ dotenv.config();
 
 const AI_CONFIG = {
   googleApiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-  model: process.env.MERCURYCLI_MODEL || "gemini-2.5-flash",
+  model: process.env.MERCURYCLI_MODEL || "gemini-2.0",
 };
 
 Object.freeze(AI_CONFIG);
