@@ -1,5 +1,5 @@
 import { google } from "@ai-sdk/google";
-import { convertToModelMessages, streamText, tool } from "ai";
+import { generateObject, streamText } from "ai";
 import config from "../config/ai.config.js";
 import chalk from "chalk";
 export class AIService {
@@ -108,5 +108,25 @@ Always explain what tool you're using and why. Use tools proactively to give bet
       tools
     );
     return result.content;
+  }
+
+  /**
+   * Generate Structured output based on a provided schema.
+   * @param {Object} schema - ZOD schema object
+   * @param {string} prompt - Prompt to guide the generation
+   * @return {Promise<Object>} Parsed object matching the schema
+   */
+  async generateStuctured() {
+    try {
+      const res = await generateObject({
+        model: this.model,
+        schema: schema,
+        prompt: prompt,
+      });
+      return res.object;
+    } catch (error) {
+      console.error(chalk.red("Error generating structured object:"), error);
+      throw error;
+    }
   }
 }
