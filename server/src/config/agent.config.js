@@ -2,7 +2,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import chalk from "chalk";
 import { generateObject } from "ai";
-import { success, z } from "zod";
+import { z } from "zod";
 // SCHEMA OF THE APPLICATION FOR AI
 const APPLICATION_SCHEMA = z.object({
   folderName: z.string().describe("Kebab-case name of the application folder"),
@@ -14,7 +14,7 @@ const APPLICATION_SCHEMA = z.object({
           .string()
           .describe("File path relative to the application folder"),
         content: z.string().describe("Content of the file completed by the AI"),
-      })
+      }),
     )
     .describe("List of files to be created for the application"),
 
@@ -23,8 +23,8 @@ const APPLICATION_SCHEMA = z.object({
       z
         .string()
         .describe(
-          "Bash commands to setup and run (e.g., npm install, npm start)"
-        )
+          "Bash commands to setup and run (e.g., npm install, npm start)",
+        ),
     )
     .describe("List of setup commands for the application"),
 });
@@ -81,7 +81,7 @@ async function createApplicationFiles(baseDir, files, folderName) {
 export async function generateApplication(
   description,
   aiService,
-  cwd = process.cwd()
+  cwd = process.cwd(),
 ) {
   const AI_AGENT_PROMPT = `Create a complete application based on the following description:${description}\n
         CRITICAL REQUIREMENTS:\n
@@ -122,7 +122,7 @@ export async function generateApplication(
     const appDir = await createApplicationFiles(
       cwd,
       application.files,
-      application.folderName
+      application.folderName,
     );
     printSystem(chalk.green("✅ Application files created successfully.\n"));
     printSystem(chalk.cyan(`Location:${chalk.bold(appDir)}\n`));

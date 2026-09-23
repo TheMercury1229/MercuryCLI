@@ -1,89 +1,103 @@
+#!/usr/bin/env node
 import chalk from "chalk";
 import { Command } from "commander";
+import { intro, isCancel, outro, select } from "@clack/prompts";
 import yoctoSpinner from "yocto-spinner";
 import { getStoredToken } from "../../../lib/token.js";
 import prisma from "../../../lib/db.js";
-import { select } from "@clack/prompts";
-import { startChatWithAI } from "../../chat/chatwithai.js";
-import { startToolChat } from "../../chat/chatwithtools.js";
-import { startChatWithAIAgent } from "../../chat/chatwithaiagent.js";
+import { ChatService } from "../../../service/chat.service.js";
+import { runAgentMode } from "../../modes/agent/orchestrator.js";
+import { runAskMode } from "../../modes/ask/orchestrator.js";
+import { runPlanMode } from "../../modes/plan/orchestrator.js";
 
-export async function wakeupCommand() {
-  const token = getStoredToken();
-  if (!token) {
-    console.log(
-      chalk.red(
-        "You must be logged in to wake up the AI service. Please run 'mercury-cli login' first."
-      )
-    );
+/**
+ * @typedef {Object} DbContext
+ * @property {string} conversationId
+ * @property {string} userId
+ * @property {(content: string) => Promise<void>} saveUserMessage
+ * @property {(content: string) => Promise<void>} saveAssistantMessage
+ * @property {(title: string) => Promise<void>} updateTitle
+ * @property {() => Promise<Array<{role: string, content: string}>>} getMessages
+ */
+
+async function wakeupCommand() {
+  intro(chalk.bold.cyan("Mercury AI"));
+
+  // ── Auth (unchanged logic) ────────────────────────────────────────────────
+  const token = await getStoredToken();
+  if (!token?.access_token) {
+    console.log(chalk.red("✗ Not logged in. Run: mercury-cli login"));
     process.exit(1);
   }
 
-  const spinner = yoctoSpinner({ text: "Waking up the AI service..." });
-  spinner.start();
+  const spinner = yoctoSpinner({ text: "Authenticating..." }).start();
   const user = await prisma.user.findFirst({
     where: {
-      sessions: {
-        some: {
-          token: token.access_token,
-        },
-      },
+      sessions: { some: { token: token.access_token } },
     },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      image: true,
-    },
+    select: { id: true, name: true, email: true },
   });
-  spinner.stop();
+
   if (!user) {
-    console.log(
-      chalk.red("User not found. Please ensure you are logged in correctly.")
-    );
+    spinner.error("User not found. Please ensure you are logged in correctly.");
     process.exit(1);
   }
-  console.log(
-    chalk.green(
-      `AI service is awake and ready to assist you, ${user.name || user.email}!`
-    )
-  );
+  spinner.success(`Welcome back, ${chalk.bold(user.name || user.email)}!`);
 
-  const choice = await select({
-    message: "Select an Option:",
+  // ── Mode select ───────────────────────────────────────────────────────────
+  const mode = await select({
+    message: "What would you like to do?",
     options: [
-      {
-        value: "chat",
-        label: "Chat with AI",
-        hint: "Start a conversation with the AI",
-      },
-      {
-        value: "tool",
-        label: "Use AI Tool",
-        hint: "Chat with tools (e.g. Google Search,Code execution)",
-      },
-      {
-        value: "agent",
-        label: "Agentic Mode",
-        hint: "Advanced AI agent",
-      },
+      { value: "ask",   label: "Ask",   hint: "answer questions about your codebase" },
+      { value: "agent", label: "Agent", hint: "autonomously edit files with staged approval" },
+      { value: "plan",  label: "Plan",  hint: "generate a plan and run it step by step" },
     ],
   });
-  switch (choice) {
-    case "chat":
-      startChatWithAI("chat");
-      break;
-    case "tool":
-      startToolChat("tool");
-      break;
-    case "agent":
-      startChatWithAIAgent("agent");
-      break;
-    default:
-      console.log(chalk.red("Invalid choice. Exiting."));
-      process.exit(1);
+
+  if (isCancel(mode)) {
+    outro(chalk.dim("Goodbye!"));
+    return;
   }
+
+  // ── DB: create conversation + build dbContext ──────────────────────────────
+  const chatService = new ChatService();
+  const conversation = await chatService.getOrCreateConversation(user.id, mode);
+
+  /** @type {DbContext} */
+  const dbContext = {
+    conversationId: conversation.id,
+    userId: user.id,
+    saveUserMessage: async (content) => {
+      await chatService.addMessage(
+        conversation.id,
+        "user",
+        typeof content === "string" ? content : JSON.stringify(content)
+      );
+    },
+    saveAssistantMessage: async (content) => {
+      await chatService.addMessage(
+        conversation.id,
+        "assistant",
+        typeof content === "string" ? content : JSON.stringify(content)
+      );
+    },
+    updateTitle: async (title) => {
+      await chatService.updateTitle(conversation.id, user.id, title);
+    },
+    getMessages: async () => {
+      const msgs = await chatService.getConversationMessages(conversation.id);
+      return chatService.formatMessagesForAI(msgs);
+    },
+  };
+
+  // ── Dispatch ──────────────────────────────────────────────────────────────
+  if (mode === "ask")   await runAskMode(dbContext);
+  if (mode === "agent") await runAgentMode(dbContext);
+  if (mode === "plan")  await runPlanMode(dbContext);
+
+  outro(chalk.dim("Goodbye!"));
 }
+
 export const wakeup = new Command("wakeup")
-  .description("Wake up the AI service and prepare for interaction")
+  .description("Start Mercury AI")
   .action(wakeupCommand);
