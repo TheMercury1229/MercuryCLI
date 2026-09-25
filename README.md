@@ -28,21 +28,25 @@ Mercury CLI includes a full-stack authentication system utilizing RFC 8628-style
 ## Features
 
 ### 🧠 Three Specialized AI Modes
+
 - **Ask Mode**: Fast, read-only multi-turn Q&A agent for analyzing repository structure, inspecting files, searching code patterns, reading skill documents, and querying live web documentation without modifying your disk.
 - **Agent Mode**: Autonomous multi-step coding agent that plans and stages workspace mutations (creating, editing, and deleting files, creating folders, running terminal commands) with an interactive staging and review system.
 - **Plan Mode**: Two-stage architectural planner that breaks complex goals down into actionable steps, allows you to interactively pick which steps to execute, and runs each step with full tool capabilities before presenting a unified diff for approval.
 
 ### 🛡️ Safe Staging & Interactive Approval
+
 - **Unified Diff Inspection**: Review staged changes with terminal-rendered syntax highlighting and color-coded diffs before anything is written to disk.
 - **Granular Approval**: Choose to apply all changes, review changes file-by-file, or discard all staged mutations.
 - **Safe Command Queueing**: Shell commands proposed by the agent are queued and executed only upon explicit user confirmation.
 
 ### 🔍 Comprehensive Tool Ecosystem
+
 - **File System Operations**: Read files, search files by glob pattern and content substring, create/modify/delete files, create directories, and generate structural codebase summaries.
 - **Skills System**: Discovers and interprets `SKILL.md` files located across standard agent skill directories.
 - **Web Intelligence (Firecrawl)**: Integrated web search, markdown web page scraping, and HTTP fetching for real-time documentation and library lookups.
 
 ### 🔐 Secure Authentication & Persistence
+
 - **Device Authorization Flow**: Seamless terminal login via browser verification with GitHub OAuth and session token management.
 - **Persistent Conversation History**: Every interaction, plan, step execution, and agent response is stored in PostgreSQL via Prisma ORM for full auditability and multi-turn context.
 
@@ -51,6 +55,7 @@ Mercury CLI includes a full-stack authentication system utilizing RFC 8628-style
 ## Tech Stack
 
 ### CLI & Backend (Server)
+
 - **Runtime**: Node.js (ES Modules)
 - **AI Integration**:
   - [Vercel AI SDK](https://sdk.vercel.ai/) (`ai` v7) — `ToolLoopAgent` and `generateObject`
@@ -70,6 +75,7 @@ Mercury CLI includes a full-stack authentication system utilizing RFC 8628-style
   - [`zod`](https://zod.dev/) — Tool input validation schemas
 
 ### Web Client (Frontend)
+
 - **Framework**: [Next.js](https://nextjs.org/) 16 (App Router) with [React](https://react.dev/) 19 & TypeScript
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/) v4
 - **UI Components**: [Radix UI](https://www.radix-ui.com/) primitives with custom glassmorphism design
@@ -112,20 +118,22 @@ Mercury CLI includes a full-stack authentication system utilizing RFC 8628-style
 - **Database**: PostgreSQL instance running locally or hosted (e.g. Supabase, Neon)
 - **API Keys**:
   - [OpenRouter API Key](https://openrouter.ai/keys)
-  - [Firecrawl API Key](https://firecrawl.dev/) *(Optional, for web search and crawling)*
-  - GitHub OAuth Application credentials *(For authentication)*
+  - [Firecrawl API Key](https://firecrawl.dev/) _(Optional, for web search and crawling)_
+  - GitHub OAuth Application credentials _(For authentication)_
 
 ---
 
 ### Installation & Setup
 
 #### 1. Clone the repository
+
 ```bash
 git clone https://github.com/TheMercury1229/MercuryCLI.git
 cd MercuryCLI
 ```
 
 #### 2. Install dependencies
+
 ```bash
 # Install backend dependencies
 cd server
@@ -139,6 +147,7 @@ pnpm install
 #### 3. Configure Environment Variables
 
 **Server Configuration (`server/.env`)**:
+
 ```env
 # Application
 PORT=3005
@@ -165,12 +174,14 @@ FIRECRAWL_API_KEY="your_firecrawl_api_key"
 ```
 
 **Client Configuration (`client/.env`)**:
+
 ```env
 NEXT_PUBLIC_BACKEND_URL="http://localhost:3005"
 NEXT_PUBLIC_AUTH_CALLBACK_URL="http://localhost:3000"
 ```
 
 #### 4. Initialize the Database
+
 ```bash
 cd server
 npx prisma generate
@@ -178,6 +189,7 @@ npx prisma db push
 ```
 
 #### 5. Link the CLI globally (Optional)
+
 ```bash
 cd server
 npm link
@@ -190,20 +202,25 @@ pnpm link --global
 ## Running the Application
 
 ### 1. Start the Auth Server
+
 ```bash
 cd server
 pnpm dev
 ```
+
 The server will run on `http://localhost:3005`.
 
 ### 2. Start the Web Client
+
 ```bash
 cd client
 pnpm dev
 ```
+
 The client will run on `http://localhost:3000`.
 
 ### 3. Launch Mercury CLI
+
 ```bash
 # If globally linked:
 mercury-cli
@@ -217,18 +234,19 @@ node src/cli/main.js
 
 ## CLI Commands
 
-| Command | Description |
-| :--- | :--- |
-| `mercury-cli login` | Initiates the device authorization flow, opens the browser to `/device`, and polls until authenticated. |
-| `mercury-cli logout` | Clears stored session tokens from `~/.mercury/token.json`. |
-| `mercury-cli whoami` | Displays details of the currently authenticated user and active session. |
-| `mercury-cli wakeup` | Launches the interactive mode selector (**Ask**, **Agent**, or **Plan**). |
+| Command              | Description                                                                                             |
+| :------------------- | :------------------------------------------------------------------------------------------------------ |
+| `mercury-cli login`  | Initiates the device authorization flow, opens the browser to `/device`, and polls until authenticated. |
+| `mercury-cli logout` | Clears stored session tokens from `~/.mercury/token.json`.                                              |
+| `mercury-cli whoami` | Displays details of the currently authenticated user and active session.                                |
+| `mercury-cli wakeup` | Launches the interactive mode selector (**Ask**, **Agent**, or **Plan**).                               |
 
 ---
 
 ## AI Modes
 
 ### 1. Ask Mode (`ask`)
+
 Designed for **read-only codebase understanding and exploration**.
 
 - **Workflow**:
@@ -239,6 +257,7 @@ Designed for **read-only codebase understanding and exploration**.
 - **Safety**: Purely read-only; file creation, modification, deletion, and shell commands are disabled.
 
 ### 2. Agent Mode (`agent`)
+
 Designed for **autonomous multi-step file editing and code generation**.
 
 - **Workflow**:
@@ -251,6 +270,7 @@ Designed for **autonomous multi-step file editing and code generation**.
   4. Summaries of applied changes and execution status are recorded in the database.
 
 ### 3. Plan Mode (`plan`)
+
 Designed for **complex, multi-phase architectural features and refactoring**.
 
 - **Workflow**:
@@ -266,22 +286,22 @@ Designed for **complex, multi-phase architectural features and refactoring**.
 
 Mercury CLI equips its AI agents with a comprehensive suite of tools defined using Zod schemas:
 
-| Tool | Category | Description |
-| :--- | :--- | :--- |
-| `read_file` | File System | Reads full contents of a file relative to the workspace root. |
-| `create_file` | File System | Stages creation of a new file with content. |
-| `modify_file` | File System | Stages full-file replacement for an existing file. |
-| `delete_file` | File System | Stages deletion of a target file. |
-| `create_folder` | File System | Stages creation of directory trees (`mkdir -p`). |
-| `list_files` | File System | Lists files and subdirectories, with optional recursive traversal. |
-| `search_files` | File System | Searches files by glob pattern (`*.ts`, `**/*.md`) with optional content substring matching. |
-| `analyze_codebase` | Analysis | Summarizes workspace structure, file counts, sizes, and file extension distributions. |
-| `execute_shell` | System | Stages execution of a terminal command in the workspace upon approval. |
-| `list_skills` | Skills | Discovers `SKILL.md` files across agent skill roots. |
-| `read_skill` | Skills | Reads detailed instructions from a selected skill file. |
-| `web_search` | Web (Firecrawl) | Searches the web and returns ranked titles, URLs, and snippets. |
-| `web_crawl` | Web (Firecrawl) | Scrapes a webpage directly into clean markdown. |
-| `fetch_url` | Web | Executes HTTP GET request against a target URL. |
+| Tool               | Category        | Description                                                                                  |
+| :----------------- | :-------------- | :------------------------------------------------------------------------------------------- |
+| `read_file`        | File System     | Reads full contents of a file relative to the workspace root.                                |
+| `create_file`      | File System     | Stages creation of a new file with content.                                                  |
+| `modify_file`      | File System     | Stages full-file replacement for an existing file.                                           |
+| `delete_file`      | File System     | Stages deletion of a target file.                                                            |
+| `create_folder`    | File System     | Stages creation of directory trees (`mkdir -p`).                                             |
+| `list_files`       | File System     | Lists files and subdirectories, with optional recursive traversal.                           |
+| `search_files`     | File System     | Searches files by glob pattern (`*.ts`, `**/*.md`) with optional content substring matching. |
+| `analyze_codebase` | Analysis        | Summarizes workspace structure, file counts, sizes, and file extension distributions.        |
+| `execute_shell`    | System          | Stages execution of a terminal command in the workspace upon approval.                       |
+| `list_skills`      | Skills          | Discovers `SKILL.md` files across agent skill roots.                                         |
+| `read_skill`       | Skills          | Reads detailed instructions from a selected skill file.                                      |
+| `web_search`       | Web (Firecrawl) | Searches the web and returns ranked titles, URLs, and snippets.                              |
+| `web_crawl`        | Web (Firecrawl) | Scrapes a webpage directly into clean markdown.                                              |
+| `fetch_url`        | Web             | Executes HTTP GET request against a target URL.                                              |
 
 ---
 
@@ -358,30 +378,32 @@ mercury-cli/
 ## Screenshots & Interface
 
 ### Authentication Flow
+
 **Device Code Login Flow**
 ![Login](./screenshots/login.png)
-*CLI prompts with verification URL and user code, automatically opening the browser to authorize.*
+_CLI prompts with verification URL and user code, automatically opening the browser to authorize._
 
 **Authenticated User Status**
 ![User Info](./screenshots/whoami.png)
-*View current session and identity via `mercury-cli whoami`.*
+_View current session and identity via `mercury-cli whoami`._
 
 ### AI Modes in Action
+
 **Interactive Mode Selection**
 ![Options](./screenshots/options.png)
-*Choose between Ask, Agent, and Plan modes when running `mercury-cli wakeup`.*
+_Choose between Ask, Agent, and Plan modes when running `mercury-cli wakeup`._
 
 **Ask Mode**
 ![Chat with AI](./screenshots/chatwithai.png)
-*Explore your codebase with multi-turn conversation and real-time tool tracking.*
+_Explore your codebase with multi-turn conversation and real-time tool tracking._
 
 **Agent & Plan Modes**
 ![AI Tools](./screenshots/aitools.png)
-*Autonomous tool execution with live step-by-step progress.*
+_Autonomous tool execution with live step-by-step progress._
 
 **Staged Code Modifications**
 ![AI Agent](./screenshots/aiagent.png)
-*Review generated file trees and unified diffs before applying changes.*
+_Review generated file trees and unified diffs before applying changes._
 
 ---
 
@@ -394,9 +416,3 @@ Contributions, issues, and feature requests are welcome!
 3. Commit your changes (`git commit -m 'Add some amazing feature'`).
 4. Push to the branch (`git push origin feature/amazing-feature`).
 5. Open a Pull Request.
-
----
-
-## License
-
-This project is licensed under the [ISC License](LICENSE).
